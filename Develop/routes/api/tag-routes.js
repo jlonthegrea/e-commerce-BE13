@@ -1,101 +1,44 @@
 const router = require('express').Router();
 const { Tag, Product, ProductTag } = require('../../models');
 
+// The `/api/tags` endpoint
 // find all tags
 // be sure to include its associated Product data
-router.get('/', (req, res) => {
-  Tag.findAll({
-    include: [{
-      as: 'productTag' 
-    }]
-  })
-  .then(dbTagData => res.json(dbTagData))
-  .catch(error => {
-    console.log(error);
-    res.status(500).json(error);
-  })
+router.get('/', async(req, res) => {
+  const allTags = await Tag.findAll({
+    include: [{model: Product, as: 'productTag'}]
+  });
+  res.json(allTags);
 });
 
 // find a single tag by its `id`
 // be sure to include its associated Product data
-router.get('/:id', (req, res) => {
-  Tag.findOne({
-    where: {
-      id: req.params.id
-    },
-    include: [{
-      model: Product,
-      as: 'productTag'
-    }]
-  })
-  .then(dbTagData => {
-    if (!dbTagData) {
-      res.status(404).json({
-        message: 'Cannot find tag with this id.'
-      });
-      return;
-    }
-    res.json(dbTagData);
-  })
-  .catch(error => {
-    console.log(error);
-    res.status(500).json(error);
-  })
+router.get('/:id', async (req, res) => {
+  const tagId = await Tag.findByPk(req.params.id, {
+    include: [{ model: Product }]
+  });
+  res.json(tagId);
 });
 
 // create a new tag
-router.post('/', (req, res) => {
-  Tag.create({
-    tag_name: req.body.tag_name 
-  })
-  .then(dbTagData => res.json(dbTagData))
-  .catch(error => {
-    console.log(error);
-    res.status(500).json(error);
-  });
+router.post('/', async (req, res) => {
+  const createATag = await Tag.create(req.body);
+  res.json(`${req.method} request recieved`);
 });
 
 // update a tag's name by its `id` value
-router.put('/:id', (req, res) => {
-  Tag.update(req.body, {
-    where: {
-      id: req.params.id
-    }
-  })
-  .then(dbTagData => {
-    if (!dbTagData) {
-      res.status(404).json({
-        message: 'Cannot find tag with this id.'
-      });
-      return;
-    }
-    res.json(dbTagData);
-  })
-  .catch(error => {
-    console.log(error);
-    res.status(500).json(error);
-  });
+router.put('/:id', async (req, res) => {
+  const tagId = await Tag.findByPk(req.params.id);
+  await tagId.update(req.body);
+  await tagId.save();
+  res.json(`${req.method} request recieved`);
 });
 
 // delete on tag by its `id` value
-router.delete('/:id', (req, res) => {
-  Tag.destroy({
-    where: {
-      id: req.params.id 
-    }
-  })
-  .then(dbTagData => {
-    if (!dbTagData) {
-      res.status(404).json({
-        message: 'Cannot find tag with this id.'
-      });
-      return;
-    }
-    res.json(dbTagData);
-  })
-  .catch(error => { ;
-  res.status(500).json(error);
-  });
+router.delete('/:id', async (req, res) => {
+  const deleteATag = await Tag.findByPk(req.params.id);
+  await deleteATag.destroy();
+  res.json(`${req.method} request recieved`);
 });
 
 
