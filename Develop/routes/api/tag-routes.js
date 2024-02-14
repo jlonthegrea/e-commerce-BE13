@@ -15,7 +15,7 @@ router.get('/', async(req, res) => {
 // be sure to include its associated Product data
 router.get('/:id', async (req, res) => {
   const tagId = await Tag.findByPk(req.params.id, {
-    include: [{ model: Product }]
+    include: [{ model: Product, as: 'productTag' }]
   });
   res.json(tagId);
 });
@@ -36,8 +36,7 @@ router.put('/:id', async (req, res) => {
 
 // delete on tag by its `id` value
 router.delete('/:id', async (req, res) => {
-  const deleteATag = await Tag.findByPk(req.params.id);
-  await deleteATag.destroy();
+  const deleteATag = await Tag.destroy({where: {id:req.params.id}});
   res.json(`${req.method} request recieved`);
 });
 
